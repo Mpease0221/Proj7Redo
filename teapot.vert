@@ -17,7 +17,8 @@ uniform mat4 shadowMatrix;
 void main()
 {
     gl_Position = projection * view * model * vec4(pos, 1);
-    gl_Position = shadowMatrix * vec4(pos, 1);
+    // Debugging help to show the render in light space.
+    //gl_Position = shadowMatrix * vec4(pos, 1);
     fixedNorm = transpose(inverse(mat3(model))) * norm;
     fragPos = vec3(model * vec4(pos, 1));
     fragPosSampleSpace = shadowMatrix * vec4(pos, 1.0);

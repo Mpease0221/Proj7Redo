@@ -65,5 +65,8 @@ void main()
     // We need to change that to 0 and 1.
 //    color = vec4(objColor,1);
     color *= textureProj(shadowMap, fragPosSampleSpace);
-    color = vec4(vec3(textureProj(shadowMap, fragPosSampleSpace) > 0 ? 0 : 1) ,1);
+
+
+    // This is giving an all black model, suggesting that the depthmap is all blank.
+    //color = vec4(vec3(textureProj(shadowMap, fragPosSampleSpace) > 0 ? 0 : 1) ,1);
 }

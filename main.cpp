@@ -122,26 +122,20 @@ void displayCallback() {
     glDrawArrays(GL_TRIANGLES, 0, 6);
     shadowMap.Unbind();
 
-//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//    glViewport(0, 0, screenWidth, screenHeight);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Second Pass
     glClearColor(0.f, 0.2f, 0.2f, 1.f);
 
     // Rerender the teapot.
-    // THIS GIVES ME SIMILAR RESULTS!
-    //glBindTexture(GL_TEXTURE_2D, 14);
-//    shadowMap.BindTexture(0);
-    glBindTexture(GL_TEXTURE_2D, shadowMap.GetTextureID());
     teapotProgram.Bind();
+    glBindTexture(GL_TEXTURE_2D, shadowMap.GetTextureID());
     prepareTeapotMatrices();
     glBindVertexArray(teapotVao);
-//    glBindTexture(GL_TEXTURE_2D, shadowMap.GetTextureID());
+    glBindTexture(GL_TEXTURE_2D, shadowMap.GetTextureID());
     glDrawArrays(GL_TRIANGLES, 0, teapotMesh.NF() * 3);
 
     // The floor should be able to use the same shader as the teapot.
-//    prepareFloorMatrices();
     glBindVertexArray(floorVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
