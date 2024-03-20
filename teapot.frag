@@ -38,30 +38,32 @@ const vec3 objColor = vec3(1, 0.3, 0.2);
 
 void main()
 {
-//    vec3 normal = normalize(fixedNorm);
-//    vec3 lightColor = vec3(1.f);
-//    vec3 ambient = 0.2 * lightColor;
-//    // lambertian diffuse.
-//    vec3 lightDir = normalize(lightPos - fragPos);
-//    float diffusion = max(dot(lightDir, normal), 0.0);
-//    vec3 diffuse = diffusion * lightColor;
-//    // Specular reflections
-//    vec3 viewDir = normalize(viewPos - fragPos);
-//    // learnopengl is using the more realistic looking half angle calculation. Neat!
-//    // This is a really cool way to do that!
-//    vec3 halfwayVec = normalize(lightDir + viewDir);
-//    float spec = pow(max(dot(normal, halfwayVec), 0.0), 64.0);
-//    vec3 specularColor = spec * lightColor;
-//    // Calculates the shadow values.
-//    float shadow = ShadowCalculation(fragPosLightSpace);
-//    // We don't affect the ambient color by the shadow at all.
-//    // That would take away the significance of the ambient light!
-//    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specularColor)) * objColor;
-//
-//    color = vec4(lighting, 1);
+    vec3 normal = normalize(fixedNorm);
+    vec3 lightColor = vec3(1.f);
+    vec3 ambient = 0.2 * lightColor;
+    // lambertian diffuse.
+    vec3 lightDir = normalize(lightPos - fragPos);
+    float diffusion = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diffusion * lightColor;
+    // Specular reflections
+    vec3 viewDir = normalize(viewPos - fragPos);
+    // learnopengl is using the more realistic looking half angle calculation. Neat!
+    // This is a really cool way to do that!
+    vec3 halfwayVec = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayVec), 0.0), 64.0);
+    vec3 specularColor = spec * lightColor;
+    // Calculates the shadow values.
+    //float shadow = ShadowCalculation(fragPosLightSpace);
+    float shadow = 0.0;
+    // We don't affect the ambient color by the shadow at all.
+    // That would take away the significance of the ambient light!
+    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specularColor)) * objColor;
+
+    color = vec4(lighting, 1);
 
     // Right now, fragPosLightSpace is between -1 and 1.
     // We need to change that to 0 and 1.
-    color = vec4(objColor,1);
+//    color = vec4(objColor,1);
     color *= textureProj(shadowMap, fragPosSampleSpace);
+    color = vec4(vec3(textureProj(shadowMap, fragPosSampleSpace) > 0 ? 0 : 1) ,1);
 }

@@ -30,11 +30,14 @@ cy::GLRenderDepth2D shadowMap;
 cy::GLSLProgram shadowProgram;
 unsigned int shadWidth = 800;
 unsigned int shadHeight = 800;
+// The shadow view matrix has the camera located AT the light source!
+auto shadowView = glm::mat4(1.f);
+auto shadowProjection = glm::mat4(1.f);
 
 // The light position.
-glm::vec3 lightPos = glm::vec3(15, 15, 15);
+glm::vec3 lightPos = glm::vec3(70, 15, 70);
 glm::vec3 lightTarget = glm::vec3(0, 0, 0);
-float lightSpread = glm::radians(75.f);
+float lightSpread = glm::radians(89.f);
 
 // Mouse callback fields.
 int firstX = 0;
@@ -94,6 +97,11 @@ int main(int argc, char *argv[]) {
     );
     shadowMap.BuildTextureMipmaps();
     shadowMap.SetTextureFilteringMode(GL_LINEAR, GL_LINEAR);
+    shadowView = glm::lookAt(lightPos, lightTarget, glm::vec3(0, 1, 0));
+    // We can use a perspective matrix as a spotlight effect!
+    // 1000 is some bogus number, lol!
+    shadowProjection = glm::perspective(lightSpread, 1.0f, 0.1f, 200.f);
+    shadowProgram.BuildFiles("../shadow.vert", "../shadow.frag");
 
     glutMainLoop();
     return 0;
@@ -281,9 +289,8 @@ void prepareTeapotMatrices(){
     cameraPos = 50.f * cameraPos;
 
     teapotView = glm::lookAt(glm::vec3(cameraPos), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-    // 20 is a bogus number again.
     // It should be about 5*bounding box size
-    teapotProjection = glm::perspective(glm::radians(teapotZoom), 1.0f, 0.1f, 150.f);
+    teapotProjection = glm::perspective(glm::radians(teapotZoom), 1.0f, 0.1f, 1500.f);
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &teapotModel[0][0]);
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &teapotView[0][0]);
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, &teapotProjection[0][0]);
@@ -293,35 +300,20 @@ void prepareTeapotMatrices(){
     glUniform3fv(lightPosLoc, 1, &lightPos[0]);
     glUniform3fv(viewPosLoc, 1, &cameraPos[0]);
 
-    // The shadow view matrix has the camera located AT the light source!
-    auto shadowView = glm::mat4(1.f);
-    shadowView = glm::lookAt(lightPos, lightTarget, glm::vec3(0, 1, 0));
-    auto shadowProjection = glm::mat4(1.f);
-    // We can use a perspective matrix as a spotlight effect!
-    // 1000 is some bogus number, lol!
-    shadowProjection = glm::perspective(lightSpread, 1.0f, 0.1f, 200.f);
-
     // The shadow matrix is T*S*shadProj*shadView*teapotModel.
     // where t is a translation of (0.5,0.5,0.5) and S is a scale of (0.5).
     auto shadowMatrix = glm::mat4(1.f);
     shadowMatrix = shadowProjection * shadowView * teapotModel;
     shadowMatrix = glm::scale(shadowMatrix, glm::vec3(0.5));
     shadowMatrix = glm::translate(shadowMatrix, glm::vec3(0.5, 0.5, 0.5));
-    uint shadowMatrixLoc = glGetUniformLocation(teapotProgram.GetID(), "shadowMatrix");
+    unsigned int shadowMatrixLoc = glGetUniformLocation(teapotProgram.GetID(), "shadowMatrix");
     glUniformMatrix4fv(shadowMatrixLoc, 1, GL_FALSE, &shadowMatrix[0][0]);
 
 }
 
 void prepareShadowMatrices(){
-    // The shadow view matrix has the camera located AT the light source!
-    auto shadowView = glm::mat4(1.f);
-    shadowView = glm::lookAt(lightPos, lightTarget, glm::vec3(0, 1, 0));
-    auto shadowProjection = glm::mat4(1.f);
-    // We can use a perspective matrix as a spotlight effect!
-    // 1000 is some bogus number, lol!
-    shadowProjection = glm::perspective(lightSpread, 1.0f, 0.1f, 200.f);
-    uint viewLoc = glGetUniformLocation(shadowProgram.GetID(), "view");
-    uint projectionLoc = glGetUniformLocation(shadowProgram.GetID(), "projection");
+    unsigned int viewLoc = glGetUniformLocation(shadowProgram.GetID(), "view");
+    unsigned int projectionLoc = glGetUniformLocation(shadowProgram.GetID(), "projection");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &shadowView[0][0]);
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, &shadowProjection[0][0]);
 }
